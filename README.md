@@ -1,57 +1,88 @@
-# Log
+# LogSystem
 
 A lightweight logging utility that supports multiple output methods.
 
 Each log message includes debugging information such as:
- - Timestamp
- - Log level
+ - Timestamp (ISO8601 Format)
+ - Log level (DEBUG, INFO, NOTICE, ERROR, FAULT)
  - Category
  - Thread identifier
  - Source file and line number
  - Function name
 
-## Example output
+## Console Logger Example output
 ```text
 2026-06-11T06:21:15.782Z [DEBUG] [LifeCycle] [MainThread] [SplashViewController.swift:21] [init(viewModel:)]
 SplashViewController init
 ```
 
-## Recommended Usage
+## LogSystemMacro
+
+`@LogSystem` automatically generates multiple logging systems.
+
+### What You Write
 
 ```swift
-public struct Log {
+@LogSystem
+public enum Log {
     
-    private enum LoggerType: String {
-        case main = "Main"
+    public enum LoggerType: String {
         case network = "Network"
         case lifeCycle = "LifeCycle"
     }
     
-    private static let main = ConsoleLogger(category: LoggerType.main.rawValue)
+    public static let subsystem: String = Bundle.main.bundleIdentifier ?? "com.hosungkim.log"
+}
+```
+
+### What the Macro Generates
+
+```swift
+public enum Log {
     
-    public static let network = ConsoleLogger(category: LoggerType.network.rawValue)
-    public static let lifeCycle = ConsoleLogger(category: LoggerType.lifeCycle.rawValue)
-    
-    private init() {}
-    
-    public static func d(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, filename: String = #fileID, line: Int = #line, funcName: StaticString = #function) {
-        main.d(objects, separator: separator, method: method, filename: filename, line: line, funcName: funcName)
+    private enum LoggerType: String {
+        case network = "Network"
+        case lifeCycle = "LifeCycle"
     }
     
-    public static func i(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, filename: String = #fileID, line: Int = #line, funcName: StaticString = #function) {
-        main.i(objects, separator: separator, method: method, filename: filename, line: line, funcName: funcName)
+    public static let subsystem: String = Bundle.main.bundleIdentifier ?? "com.hosungkim.log"
+    
+    
+    private static let `default` = ConsoleLogger(subsystem: subsystem, category: "Default")
+    
+    public static let network = ConsoleLogger(subsystem: subsystem, category: LoggerType.network.rawValue)
+    
+    public static let lifeCycle = ConsoleLogger(subsystem: subsystem, category: LoggerType.lifeCycle.rawValue)
+    
+    public static func d(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, fileName: String = #fileID, line: Int = #line, funcName: String = #function) {
+        `default`.d(objects, separator: separator, method: method, fileName: fileName, line: line, funcName: funcName)
     }
     
-    public static func n(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, filename: String = #fileID, line: Int = #line, funcName: StaticString = #function) {
-        main.n(objects, separator: separator, method: method, filename: filename, line: line, funcName: funcName)
+    public static func i(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, fileName: String = #fileID, line: Int = #line, funcName: String = #function) {
+        `default`.i(objects, separator: separator, method: method, fileName: fileName, line: line, funcName: funcName)
     }
     
-    public static func e(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, filename: String = #fileID, line: Int = #line, funcName: StaticString = #function) {
-        main.e(objects, separator: separator, method: method, filename: filename, line: line, funcName: funcName)
+    public static func n(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, fileName: String = #fileID, line: Int = #line, funcName: String = #function) {
+        `default`.n(objects, separator: separator, method: method, fileName: fileName, line: line, funcName: funcName)
     }
     
-    public static func f(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, filename: String = #fileID, line: Int = #line, funcName: StaticString = #function) {
-        main.f(objects, separator: separator, method: method, filename: filename, line: line, funcName: funcName)
+    public static func e(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, fileName: String = #fileID, line: Int = #line, funcName: String = #function) {
+        `default`.e(objects, separator: separator, method: method, fileName: fileName, line: line, funcName: funcName)
+    }
+    
+    public static func f(_ objects: Any?..., separator: String = " ", method: ConsoleLogger.OutputMethod = .oslog, fileName: String = #fileID, line: Int = #line, funcName: String = #function) {
+        `default`.f(objects, separator: separator, method: method, fileName: fileName, line: line, funcName: funcName)
     }
 }
+```
+
+### Usage
+
+```swift
+// 1. Standard logging using the default channel
+Log.i("App successfully started.")
+
+// 2. Domain-specific logging via automatically generated static properties
+Log.network.d("GET /v1/users", response)
+Log.lifeCycle.i("SplashViewController init")
 ```
