@@ -74,7 +74,7 @@ extension ConsoleLogger {
         case error  = "ERROR"
         case fault  = "FAULT"
         
-        var osLogType: OSLogType {
+        internal var osLogType: OSLogType {
             switch self {
             case .debug:
                 return .debug
@@ -101,7 +101,7 @@ extension ConsoleLogger {
         case main
         case background(threadNumber: Int?)
         
-        init?(description: String) {
+        package init?(description: String) {
             switch description {
             case "MainThread":
                 self = .main
@@ -123,7 +123,7 @@ extension ConsoleLogger {
             return nil
         }
         
-        static var current: Self {
+        internal static var current: Self {
             let currentThread = Thread.current
             if currentThread.isMainThread {
                 return .main
@@ -205,6 +205,17 @@ extension ConsoleLogger {
         let line: Int
         let funcName: String
         let content: String
+        
+        package init(timestamp: Date, level: Level, category: String, thread: ThreadType, fileName: String, line: Int, funcName: String, content: String) {
+            self.timestamp = timestamp
+            self.level = level
+            self.category = category
+            self.thread = thread
+            self.fileName = fileName
+            self.line = line
+            self.funcName = funcName
+            self.content = content
+        }
         
         public var description: String {
             """
