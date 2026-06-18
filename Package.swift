@@ -24,6 +24,10 @@ let package = Package(
             name: "LogSystem",
             targets: ["LogSystem"]
         ),
+        .library(
+            name: "LogStore",
+            targets: ["LogStore"]
+        )
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "604.0.0-latest"),
@@ -46,6 +50,12 @@ let package = Package(
             dependencies: [
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax")
+            ]
+        ),
+        .target(
+            name: "LogStore",
+            dependencies: [
+                "ConsoleLogger"
             ]
         )
     ],
