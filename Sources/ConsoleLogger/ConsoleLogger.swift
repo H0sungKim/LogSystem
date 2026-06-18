@@ -1,6 +1,6 @@
 //
 //  ConsoleLogger.swift
-//  LogSystem
+//  ConsoleLog
 //
 //  Created by 김호성 on 2025.06.28.
 //
@@ -27,7 +27,7 @@ public struct ConsoleLogger: Sendable {
     private let logger: Logger
     private let category: String
     
-    public init(subsystem: String, category: String) {
+    public init(subsystem: String = Bundle.main.bundleIdentifier ?? "com.log.consolelogger", category: String) {
         self.category = category
         logger = Logger(subsystem: subsystem, category: category)
     }
