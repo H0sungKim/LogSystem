@@ -29,8 +29,7 @@ public struct ConsoleLoggerCategoryMacro: PeerMacro {
         }
         
         var generatedCodes: [DeclSyntax] = []
-        
-        generatedCodes.append("private static let `default` = ConsoleLogger(category: \"Default\")")
+        var isDefaultExplicitlyDeclared = false
         
         for member in targetEnum.memberBlock.members {
             guard let caseDecl = member.decl.as(EnumCaseDeclSyntax.self) else { continue }
@@ -43,9 +42,15 @@ public struct ConsoleLoggerCategoryMacro: PeerMacro {
             
             for element in caseDecl.elements {
                 let caseName = element.name.text
+                if caseName == "`default`" {
+                    isDefaultExplicitlyDeclared = true
+                }
                 let accessLevelModifier = isHidden ? "private" : "public"
                 generatedCodes.append("\(raw: accessLevelModifier) static let \(raw: caseName) = ConsoleLogger(category: \(raw: targetEnum.name.text).\(raw: caseName).rawValue)")
             }
+        }
+        if !isDefaultExplicitlyDeclared {
+            generatedCodes.append("private static let `default` = ConsoleLogger(category: \"Default\")")
         }
         
         let levels = ["d", "i", "n", "e", "f"]
